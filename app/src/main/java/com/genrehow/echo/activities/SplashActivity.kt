@@ -1,4 +1,4 @@
-package com.genrehow.echo
+package com.genrehow.echo.activities
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.Handler
 import android.support.v4.app.ActivityCompat
 import android.widget.Toast
+import com.genrehow.echo.R
 
 
 class SplashActivity : AppCompatActivity() {
