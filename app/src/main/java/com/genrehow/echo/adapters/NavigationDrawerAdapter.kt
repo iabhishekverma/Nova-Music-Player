@@ -54,6 +54,7 @@ class NavigationDrawerAdapter(_contentList:ArrayList<String>,_getImages:IntArray
                         .replace(R.id.details_fragment,aboutUsFragment)
                         .commit()
             }
+            MainActivity.Statified.drawerLayout?.closeDrawers()
         })
     }
 

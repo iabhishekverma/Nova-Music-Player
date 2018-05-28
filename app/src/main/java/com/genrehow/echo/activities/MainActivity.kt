@@ -6,28 +6,34 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.*
 import com.genrehow.echo.R
+import com.genrehow.echo.adapters.NavigationDrawerAdapter
 import com.genrehow.echo.fragments.MainScreenFragment
 
 class MainActivity : AppCompatActivity() {
 
     var navigationDrawerIconsList:ArrayList<String> = arrayListOf()
-    var drawerLayout: DrawerLayout?=null
+    var images_for_navdrawer = intArrayOf(R.drawable.navigation_allsongs,
+            R.drawable.navigation_favorites,R.drawable.navigation_settings,R.drawable.navigation_aboutus)
+   object Statified{
+
+       var drawerLayout: DrawerLayout?=null
+   }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         var toolbar=findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
-        drawerLayout =findViewById(R.id.drawer_layout)
+        MainActivity.Statified.drawerLayout =findViewById(R.id.drawer_layout)
 
         navigationDrawerIconsList.add("All Songs")
         navigationDrawerIconsList.add("Favorites")
         navigationDrawerIconsList.add("settings")
         navigationDrawerIconsList.add("About Us")
 
-        val toggle= ActionBarDrawerToggle(this@MainActivity,drawerLayout,toolbar,
+        val toggle= ActionBarDrawerToggle(this@MainActivity,MainActivity.Statified.drawerLayout,toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawerLayout?.setDrawerListener(toggle)
+        MainActivity.Statified.drawerLayout?.setDrawerListener(toggle)
             toggle.syncState()
 
         val mainScreenFragment = MainScreenFragment()
@@ -35,9 +41,15 @@ class MainActivity : AppCompatActivity() {
                 .beginTransaction()
                 .add(R.id.details_fragment,mainScreenFragment,"MainScreenFragment")
                 .commit()
+
+        var _navigationAdapter = NavigationDrawerAdapter(navigationDrawerIconsList,images_for_navdrawer,this)
+        _navigationAdapter.notifyDataSetChanged()
+
         var navigation_recycler_view = findViewById<RecyclerView>(R.id.navigation_recycler_view)
         navigation_recycler_view.layoutManager= LinearLayoutManager(this)
         navigation_recycler_view.itemAnimator= DefaultItemAnimator()
+        navigation_recycler_view.adapter = _navigationAdapter
+        navigation_recycler_view.setHasFixedSize(true)
 
     }
 
