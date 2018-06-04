@@ -15,7 +15,6 @@ class MainActivity : AppCompatActivity() {
     var images_for_navdrawer = intArrayOf(R.drawable.navigation_allsongs,
             R.drawable.navigation_favorites,R.drawable.navigation_settings,R.drawable.navigation_aboutus)
    object Statified{
-
        var drawerLayout: DrawerLayout?=null
    }
 
@@ -33,7 +32,7 @@ class MainActivity : AppCompatActivity() {
 
         val toggle= ActionBarDrawerToggle(this@MainActivity,MainActivity.Statified.drawerLayout,toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        MainActivity.Statified.drawerLayout?.setDrawerListener(toggle)
+        MainActivity.Statified.drawerLayout?.addDrawerListener(toggle)
             toggle.syncState()
 
         val mainScreenFragment = MainScreenFragment()

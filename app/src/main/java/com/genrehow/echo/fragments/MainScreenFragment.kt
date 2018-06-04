@@ -64,6 +64,11 @@ class MainScreenFragment : Fragment() {
         super.onAttach(context)
         myActivity = context as Activity
     }
+
+    override fun onAttach(activity: Activity?) {
+        super.onAttach(activity)
+        myActivity = activity
+    }
     fun getSongsFromPhone(): ArrayList<Songs>{
         var arrayList = ArrayList<Songs>()
         var contentResolver = myActivity?.contentResolver

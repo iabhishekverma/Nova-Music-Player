@@ -1,6 +1,8 @@
 package com.genrehow.echo.adapters
 
 import android.content.Context
+import android.os.Build.VERSION_CODES.N
+import android.support.v7.view.menu.ActionMenuItemView
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -10,8 +12,10 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import com.genrehow.echo.R
 import com.genrehow.echo.activities.MainActivity
+import com.genrehow.echo.fragments.AboutUsFragment
 import com.genrehow.echo.fragments.FavouriteFragment
 import com.genrehow.echo.fragments.MainScreenFragment
+import com.genrehow.echo.fragments.SettingFragment
 
 class NavigationDrawerAdapter(_contentList:ArrayList<String>,_getImages:IntArray,_context:Context): RecyclerView.Adapter<NavigationDrawerAdapter.NavViewHolder>(){
 
@@ -20,8 +24,8 @@ class NavigationDrawerAdapter(_contentList:ArrayList<String>,_getImages:IntArray
     var mContext: Context?=null
     init {
         this.contentList=contentList
-        this.getImages=getImages
-        this.mContext=mContext
+        this.getImages=_getImages
+        this.mContext=_context
     }
 
     override fun onBindViewHolder(holder: NavViewHolder, position: Int, payloads: MutableList<Any>) {
@@ -35,20 +39,20 @@ class NavigationDrawerAdapter(_contentList:ArrayList<String>,_getImages:IntArray
                         .replace(R.id.details_fragment,mainScreenFragment)
                         .commit()
             }else if(position==1){
-                val favouriteFragment= MainScreenFragment()
+                val favouriteFragment= FavouriteFragment()
                 (mContext as MainActivity).supportFragmentManager
                         .beginTransaction()
                         .replace(R.id.details_fragment,favouriteFragment)
                         .commit()
             }
             else if (position==2){
-                val settingFragment= MainScreenFragment()
+                val settingFragment= SettingFragment()
                 (mContext as MainActivity).supportFragmentManager
                         .beginTransaction()
                         .replace(R.id.details_fragment,settingFragment)
                         .commit()
             }else {
-                val aboutUsFragment= MainScreenFragment()
+                val aboutUsFragment= AboutUsFragment()
                 (mContext as MainActivity).supportFragmentManager
                         .beginTransaction()
                         .replace(R.id.details_fragment,aboutUsFragment)
@@ -66,12 +70,13 @@ class NavigationDrawerAdapter(_contentList:ArrayList<String>,_getImages:IntArray
     }
 
     override fun getItemCount(): Int {
-        return (contentList as ArrayList).size
+        return 4
     }
 
     override fun onBindViewHolder(holder: NavViewHolder, position: Int) {
 
     }
+
 
     class NavViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView){
         var icon_GET: ImageView?=null

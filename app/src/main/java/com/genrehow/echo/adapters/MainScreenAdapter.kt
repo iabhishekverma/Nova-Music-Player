@@ -1,6 +1,9 @@
 package com.genrehow.echo.adapters
 
+import android.app.Fragment
 import android.content.Context
+import android.os.Bundle
+import android.support.v4.app.FragmentActivity
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +13,9 @@ import android.widget.TextView
 import android.widget.Toast
 import com.genrehow.echo.R
 import com.genrehow.echo.Songs
+import com.genrehow.echo.activities.MainActivity
+import com.genrehow.echo.fragments.MainScreenFragment
+import com.genrehow.echo.fragments.SongPlayingFragment
 
 class MainScreenAdapter (_songDetails: ArrayList<Songs>, _context: Context) : RecyclerView.Adapter<MainScreenAdapter.MyViewHolder>() {
 
@@ -21,14 +27,22 @@ class MainScreenAdapter (_songDetails: ArrayList<Songs>, _context: Context) : Re
     }
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val songObject = songDetails?.get(position)
-
-
         holder.trackTitle?.text = songObject?.songTitle
         holder.trackArtist?.text = songObject?.artist
-
         holder.contentHolder?.setOnClickListener({
-            Toast.makeText(mContext, " Hey " + songObject?.songTitle, Toast.LENGTH_SHORT).show()
-        })
+            val songPlayingFragment= SongPlayingFragment()
+            var args = Bundle()
+            args.putString("songArtist", songObject?.artist)
+            args.putString("path", songObject?.songData)
+            args.putString("songTitle", songObject?.songTitle)
+            args.putInt("songId", songObject?.songID?.toInt() as Int)
+            args.putInt("songPosition",position)
+            args.putParcelableArrayList("songData",songDetails)
+            songPlayingFragment.arguments =args
+            (mContext as FragmentActivity).supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.details_fragment,songPlayingFragment)
+                    .commit()})
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {

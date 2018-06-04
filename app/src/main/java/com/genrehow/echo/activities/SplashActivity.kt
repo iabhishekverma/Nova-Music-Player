@@ -28,11 +28,7 @@ class SplashActivity : AppCompatActivity() {
             //we have to ask for permissions
             ActivityCompat.requestPermissions(this@SplashActivity,permissionsString,131)
         }else{
-            Handler().postDelayed({
-                val  startAct = Intent(this@SplashActivity, MainActivity::class.java)
-                startActivity(startAct)
-                this.finish()
-            },1000)
+            displaySplashScreen()
         }
     }
 
@@ -45,11 +41,7 @@ class SplashActivity : AppCompatActivity() {
                         && grantResults[2]== PackageManager.PERMISSION_GRANTED
                         && grantResults[3]== PackageManager.PERMISSION_GRANTED
                         && grantResults[4]== PackageManager.PERMISSION_GRANTED){
-                    Handler().postDelayed({
-                        val  startAct = Intent(this@SplashActivity, MainActivity::class.java)
-                        startActivity(startAct)
-                        this.finish()
-                    },1000)
+                    displaySplashScreen()
                 }else{
                     Toast.makeText(this@SplashActivity,"Please grant all the permission to continue",Toast.LENGTH_SHORT)
                     this.finish()
@@ -72,5 +64,12 @@ class SplashActivity : AppCompatActivity() {
             }
         }
         return hasAllPermissions
+    }
+    fun displaySplashScreen(){
+        Handler().postDelayed({         // Executes the code after the mentioned delay
+            val startAct = Intent(this@SplashActivity, MainActivity::class.java)
+            startActivity(startAct)
+            this.finish()
+        }, 1000)
     }
 }
