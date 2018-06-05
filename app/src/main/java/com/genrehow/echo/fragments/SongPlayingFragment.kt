@@ -21,6 +21,10 @@ import kotlinx.android.synthetic.main.fragment_song_playing.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 import android.os.Handler
+import android.provider.MediaStore
+import com.cleveroad.audiovisualization.AudioVisualization
+import com.cleveroad.audiovisualization.DbmHandler
+import com.cleveroad.audiovisualization.GLAudioVisualizationView
 
 
 /**
@@ -45,6 +49,12 @@ class SongPlayingFragment : Fragment() {
     var fetchSongs: ArrayList<Songs>? = null
 
     var currentSongHelper: CurrentSongHelper? = null
+    var audioVisualization: AudioVisualization? = null
+    var glview: GLAudioVisualizationView? = null
+    object Staticated{
+        var MY_PREFS_SHUFFLE = "Shuffle feature"
+        var MY_PREFS_LOOPS ="Loop Feature"
+    }
 
      var updateSongTime = object: Runnable{
          override fun run() {
@@ -53,6 +63,7 @@ class SongPlayingFragment : Fragment() {
                      TimeUnit.MILLISECONDS.toMinutes(getcurrent?.toLong() as Long),
                      TimeUnit.MILLISECONDS.toSeconds(getcurrent?.toLong()as Long) -
          TimeUnit.MILLISECONDS.toSeconds(TimeUnit.MILLISECONDS.toMinutes(getcurrent?.toLong() as Long))))
+            seekBar?.setProgress(getcurrent?.toInt() as Int)
              Handler().postDelayed(this,1000)
          }
 
@@ -72,7 +83,13 @@ class SongPlayingFragment : Fragment() {
         shuffleImageButton = view?.findViewById(R.id.shuffleButton)
         songArtistView = view?.findViewById(R.id.songArtist)
         songTitleView = view?.findViewById(R.id.songTitle)
+        glview=view?.findViewById(R.id.visualizer_view)
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        audioVisualization = glview as AudioVisualization
     }
 
     override fun onAttach(context: Context?) {
@@ -83,6 +100,21 @@ class SongPlayingFragment : Fragment() {
     override fun onAttach(activity: Activity?) {
         super.onAttach(activity)
         myActivity = activity
+    }
+
+    override fun onResume() {
+        super.onResume()
+        audioVisualization?.onResume()
+    }
+
+    override fun onPause() {
+        audioVisualization?.onPause()
+        super.onPause()
+    }
+
+    override fun onDestroyView() {
+        audioVisualization?.release()
+        super.onDestroyView()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -137,20 +169,54 @@ class SongPlayingFragment : Fragment() {
         onSongComplete()
         }
         clickHandler()
+        var visualizationHandler= DbmHandler.Factory.newVisualizerHandler(myActivity as Context,0)
+        audioVisualization?.linkTo(visualizationHandler)
+
+        var prefsForShuffle = myActivity?.getSharedPreferences(Staticated.MY_PREFS_SHUFFLE,Context.MODE_PRIVATE)
+        var isShuffleAllowed = prefsForShuffle?.getBoolean("feature",false)
+        if (isShuffleAllowed as Boolean){
+            currentSongHelper?.isShuffle = true
+            currentSongHelper?.isLoop = false
+            shuffleImageButton?.setBackgroundResource(R.drawable.shuffle_icon)
+            loopImageButton?.setBackgroundResource(R.drawable.loop_white_icon)
+        }else{
+            currentSongHelper?.isShuffle = false
+            shuffleImageButton?.setBackgroundResource(R.drawable.shuffle_white_icon)
+        }
+        var prefsForLoop = myActivity?.getSharedPreferences(Staticated.MY_PREFS_SHUFFLE,Context.MODE_PRIVATE)
+        var isLoopAllowed = prefsForShuffle?.getBoolean("feature",false)
+        if (isLoopAllowed as Boolean){
+            currentSongHelper?.isShuffle = false
+            currentSongHelper?.isLoop = true
+            shuffleImageButton?.setBackgroundResource(R.drawable.shuffle_white_icon)
+            loopImageButton?.setBackgroundResource(R.drawable.loop_icon)
+        }else{
+            loopImageButton?.setBackgroundResource(R.drawable.loop_white_icon)
+            currentSongHelper?.isShuffle = false
+
+        }
     }
 
     fun clickHandler() {
 
 
         shuffleImageButton?.setOnClickListener({
+            var editorShuffle = myActivity?.getSharedPreferences(Staticated.MY_PREFS_SHUFFLE,Context.MODE_PRIVATE)?.edit()
+            var editorLoop = myActivity?.getSharedPreferences(Staticated.MY_PREFS_LOOPS,Context.MODE_PRIVATE)?.edit()
             if(currentSongHelper?.isShuffle as Boolean){
                 shuffleImageButton?.setBackgroundResource(R.drawable.shuffle_white_icon)
                 currentSongHelper?.isShuffle = false
+                editorShuffle?.putBoolean("feature", false)
+                editorShuffle?.apply()
             }else{
                 currentSongHelper?.isShuffle = true
                 currentSongHelper?.isLoop = false
                 shuffleImageButton?.setBackgroundResource(R.drawable.shuffle_icon)
                 loopImageButton?.setBackgroundResource(R.drawable.loop_white_icon)
+                editorShuffle?.putBoolean("feature",true)
+                editorShuffle?.apply()
+                editorLoop?.putBoolean("feature",false)
+                editorLoop?.apply()
             }
         })
 
@@ -171,14 +237,22 @@ class SongPlayingFragment : Fragment() {
             playPrevious()
         })
         loopImageButton?.setOnClickListener({
+            var editorShuffle = myActivity?.getSharedPreferences(Staticated.MY_PREFS_SHUFFLE,Context.MODE_PRIVATE)?.edit()
+            var editorLoop = myActivity?.getSharedPreferences(Staticated.MY_PREFS_LOOPS,Context.MODE_PRIVATE)?.edit()
             if (currentSongHelper?.isLoop as Boolean) {
                 currentSongHelper?.isLoop = false
-      loopImageButton?.setBackgroundResource(R.drawable.loop_white_icon)
+                loopImageButton?.setBackgroundResource(R.drawable.loop_white_icon)
+                editorLoop?.putBoolean("feature", false)
+                editorLoop?.apply()
             } else {
                 currentSongHelper?.isLoop = true
                 currentSongHelper?.isShuffle = false
                 loopImageButton?.setBackgroundResource(R.drawable.loop_icon)
                 shuffleImageButton?.setBackgroundResource(R.drawable.shuffle_white_icon)
+                editorShuffle?.putBoolean("feature", false)
+                editorShuffle?.apply()
+                editorLoop?.putBoolean("feature", true)
+                editorLoop?.apply()
             }
         })
 
@@ -299,6 +373,7 @@ class SongPlayingFragment : Fragment() {
     fun processInformation(mediaPlayer: MediaPlayer){
         val finalTime = mediaPlayer.duration
         val startTime = mediaPlayer.currentPosition
+        seekBar?.max = finalTime
         startTimeText?.setText(String.format("%d: %d",
                 TimeUnit.MILLISECONDS.toMinutes(startTime.toLong()),
                 TimeUnit.MILLISECONDS.toSeconds(startTime.toLong()) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(startTime.toLong())))
